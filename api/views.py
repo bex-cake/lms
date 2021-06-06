@@ -6,8 +6,19 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST
 )
 
-from .models import Assignment, GradedAssignment
-from .serializers import AssignmentSerializer, GradedAssignmentSerializer
+from .models import Assignment, GradedAssignment, Course
+from .serializers import AssignmentSerializer, GradedAssignmentSerializer, CourseSerializer
+
+
+class CourseListView(ListAPIView):
+    serializer_class = CourseSerializer
+
+    def get_queryset(self):
+        queryset = Course.objects.all()
+        username = self.request.query_params.get('username', None)
+        if username is not None:
+            queryset = queryset.filter(teacher__username=username)
+        return queryset
 
 
 class AssignmentViewSet(viewsets.ModelViewSet):

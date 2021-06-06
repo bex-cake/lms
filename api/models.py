@@ -2,9 +2,25 @@ from django.db import models
 from users.models import User
 
 
+class Course(models.Model):
+    name = models.CharField(max_length=50)
+    teacher = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+class StudentToCourse(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.student.username
+
+
 class Assignment(models.Model):
     title = models.CharField(max_length=50)
-    teacher = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments', blank=True, null=True)
 
     def __str__(self):
         return self.title

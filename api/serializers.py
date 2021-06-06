@@ -1,12 +1,25 @@
 from rest_framework import serializers
 
 from users.models import User
-from .models import Assignment, Question, Choice, GradedAssignment
+from .models import Assignment, Question, Choice, GradedAssignment, Course
 
 
 class StringSerializer(serializers.StringRelatedField):
     def to_internal_value(self, value):
         return value
+
+
+class CourseSerializer(serializers.ModelSerializer):
+    assignments = serializers.SerializerMethodField()
+    teacher = StringSerializer(many=False)
+
+    class Meta:
+        model = Course
+        fields = '__all__'
+
+    def get_assignments(self, obj):
+        assignments = AssignmentSerializer(obj.assignments, many=True).data
+        return assignments
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -19,11 +32,10 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 class AssignmentSerializer(serializers.ModelSerializer):
     questions = serializers.SerializerMethodField()
-    teacher = StringSerializer(many=False)
 
     class Meta:
         model = Assignment
-        fields = ('__all__')
+        fields = '__all__'
 
     def get_questions(self, obj):
         questions = QuestionSerializer(obj.questions.all(), many=True).data
@@ -33,8 +45,8 @@ class AssignmentSerializer(serializers.ModelSerializer):
         data = request.data
 
         assignment = Assignment()
-        teacher = User.objects.get(username=data['teacher'])
-        assignment.teacher = teacher
+        course = Course.objects.get(id=data['courseId'])
+        assignment.course = course
         assignment.title = data['title']
         assignment.save()
 
@@ -63,14 +75,14 @@ class GradedAssignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GradedAssignment
-        fields = ('__all__')
+        fields = '__all__'
 
     def create(self, request):
         data = request.data
         print(data)
 
         assignment = Assignment.objects.get(id=data['asntId'])
-        student = User.objects.get(username=data['username'])
+        student = User.objects.get(username=data['student'])
 
         graded_asnt = GradedAssignment()
         graded_asnt.assignment = assignment

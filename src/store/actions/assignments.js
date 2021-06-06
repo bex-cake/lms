@@ -21,7 +21,7 @@ const getASNTListFail = error => {
   };
 };
 
-export const getASNTS = token => {
+export const getASNTS = (id, token) => {
   return dispatch => {
     dispatch(getASNTListStart());
     axios.defaults.headers = {
@@ -29,7 +29,7 @@ export const getASNTS = token => {
       Authorization: `Token ${token}`
     };
     axios
-      .get("http://127.0.0.1:8000/assignments/")
+      .get(`http://127.0.0.1:8000/courses/${id}`)
       .then(res => {
         const assignments = res.data;
         dispatch(getASNTListSuccess(assignments));
